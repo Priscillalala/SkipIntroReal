@@ -1,5 +1,4 @@
-﻿global using Path = System.IO.Path;
-global using Plugin = SkipIntroReal.SkipIntroRealPlugin;
+﻿global using Plugin = SkipIntroReal.SkipIntroRealPlugin;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;

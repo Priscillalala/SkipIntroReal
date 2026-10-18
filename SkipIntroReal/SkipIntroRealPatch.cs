@@ -1,73 +1,54 @@
 ﻿using HarmonyLib;
 using RoR2;
-using RoR2.Networking;
-using RoR2.UI.LogBook;
 using RoR2BepInExPack.GameAssetPathsBetter;
 using System.Collections;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.Networking;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace SkipIntroReal;
 
+// Only skips the intro scene because skipping the splash screen breaks the main menu; don't know why
 public static class SkipIntroRealPatch
 {
     public static void Init()
     {
-        //var locations = Addressables.LoadResourceLocationsAsync("title", typeof(Object)).WaitForCompletion();
-        //Plugin.Logger.LogMessage($"title has {locations.Count} preload locations");
-
         Plugin.Harmony.PatchAll(typeof(SkipIntroRealPatch));
         RoR2Application.onLoad += OnLoad;
 
+        // Usually IntroCutsceneController.Finish is responsible for transitioning to the title scene
+        // so we have to do it ourselves
         static void OnLoad()
         {
-            Plugin.Logger.LogMessage("Start coroutine");
-            RoR2Application.instance.StartCoroutine(SetTitleSceneCoroutine());
+            RoR2Application.instance.StartCoroutine(TransitionToTitleCoroutine());
 
-            static IEnumerator SetTitleSceneCoroutine()
+            // Wait a frame to let the other onLoad subscribers run, because some load assets
+            // Also lets the logbook finish building, apparently - the timing is pretty confusing
+            static IEnumerator TransitionToTitleCoroutine()
             {
                 yield return null;
-                //yield return new WaitForSeconds(3);
-                Plugin.Logger.LogMessage("submit command!!");
-                //RoR2.Console.instance.SubmitCmd(null, "set_scene title");
                 NetworkManager.singleton.ServerChangeScene("title");
             }
         }
     }
 
-#if true
+    // called from SplashScreenController.Finish
     [HarmonyPrefix, HarmonyPatch(typeof(LoadHelper), nameof(LoadHelper.LoadSceneAdditivelyAsync))]
-    static bool SkipSplashScene(string _sceneGuid, ref IEnumerator __result)
+    static bool SkipIntroScene(string _sceneGuid, ref IEnumerator __result)
     {
-#if false
-        if (_sceneGuid == RoR2_Base_splash.splash_unity && RoR2Application.isLoading)
+        if (_sceneGuid == RoR2_Base_intro.intro_unity)
         {
-            static IEnumerator FinishSplashScreen()
-            {
-                MusicController.Instance.StartIntroMusic();
-                yield break;
-            }
-
-            __result = FinishSplashScreen();
+            __result = EmptyCoroutine();
             return false;
-        }
-#endif
-        if (_sceneGuid == RoR2_Base_intro.intro_unity && RoR2Application.isLoading)
-        {
-            static IEnumerator FinishSplashScreen()
+
+            static IEnumerator EmptyCoroutine()
             {
                 yield break;
             }
-
-            __result = FinishSplashScreen();
-            return false;
         }
         return true;
     }
-#endif
 
+    // called from RoR2Application.InitializeGameRoutine
     [HarmonyPrefix, HarmonyPatch(typeof(LoadHelper), nameof(LoadHelper.StartLoadSceneAdditiveAsync))]
     static bool SkipIntroScene(string _sceneGuid, ref AsyncOperationHandle __result)
     {
