@@ -11,7 +11,7 @@ public class SkipIntroRealPlugin : BaseUnityPlugin
     public const string
         GUID = "groovesalad." + NAME,
         NAME = "SkipIntroReal",
-        VERSION = "1.0.0";
+        VERSION = "1.1.0";
 
     public static new ManualLogSource Logger { get; private set; }
     public static Harmony Harmony { get; private set; }

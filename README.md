@@ -1,5 +1,5 @@
 # Skip Intro: Ultra Deluxe Edition
-Skip the intro cutscene. You go directly to the main menu after the game is loaded.
+Skip the splash screen and the intro cutscene. You go directly to the main menu after the game is loaded.
 
 ## Ultra Deluxe Edition?
 Deluxe Edition was [already taken](https://thunderstore.io/c/riskofrain2/p/Hibiscus/Skip_Intro_Deluxe/)..
